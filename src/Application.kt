@@ -55,7 +55,7 @@ fun Application.module(testing: Boolean = false) {
 
         get("/") {
 
-            call.respond("Hello, Jib")
+            call.respond("Hello, Auto-Jib!!!")
 
         }
 
