@@ -3,7 +3,7 @@ steps:
   - name: 'gcr.io/cloud-builders/gradle'
     args:
       # Uncomment for projects that do not include Jib as a plugin.
-      #  - --init-script=auto-jib.gradle
+      - '--init-script=auto-jib.gradle'
 
       # Runs the Jib build.
       # For advanced customizations, configure the plugin in the build.gradle.
