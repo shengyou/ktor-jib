@@ -10,7 +10,7 @@ steps:
       - 'jib'
 
       # Sets the target image reference to push to.
-      - '--image=gcr.io/[_PROJECT]/[_IMAGE]'
+      - '--image=gcr.io/${_PROJECT}/${_IMAGE}'
 
   # Deploy an image from Container Registry to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
