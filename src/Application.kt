@@ -10,13 +10,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
 import io.ktor.response.*
 import io.ktor.request.*
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.routing
+import io.ktor.routing.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import java.util.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -43,6 +42,7 @@ fun Application.module(testing: Boolean = false) {
         for (index in 1..10) {
             val task = Task.new {
                 title = "Task $index"
+                description = "Task description $index"
                 completed = listOf(true, false, false).shuffled().first()
                 createdAt = DateTime.now()
                 updatedAt = DateTime.now()
@@ -55,7 +55,7 @@ fun Application.module(testing: Boolean = false) {
 
         get("/") {
 
-            call.respond("Hello, Auto-Jib!!!")
+            call.respond("Hello, Ktor!")
 
         }
 
@@ -65,6 +65,7 @@ fun Application.module(testing: Boolean = false) {
                     TaskResponse(
                         it.id.value,
                         it.title,
+                        it.description,
                         it.completed,
                         it.createdAt.toString("yyyy-MM-dd HH:mm:ss"),
                         it.updatedAt.toString("yyyy-MM-dd HH:mm:ss")
@@ -77,43 +78,83 @@ fun Application.module(testing: Boolean = false) {
 
         post("/api/tasks") {
             val request = call.receive<TaskRequest>()
-            transaction {
-                Task.new {
+            val task = transaction {
+                val task = Task.new {
                     title = request.title
+                    description = request.description
                     completed = false
                     createdAt = DateTime.now()
                     updatedAt = DateTime.now()
                 }
+
+                return@transaction TaskResponse(
+                    id = task.id.value,
+                    title = task.title,
+                    description = task.description,
+                    completed = task.completed,
+                    createdAt = task.createdAt.toString("yyyy-MM-dd HH:mm:ss"),
+                    updatedAt = task.updatedAt.toString("yyyy-MM-dd HH:mm:ss")
+                )
             }
 
-            call.respond(HttpStatusCode.OK)
+            call.respond(mapOf("data" to task))
         }
 
-        post("/api/tasks/{id}/complete") {
-            val id = call.parameters["id"]?.toInt()
-            transaction {
-                if (id != null) {
-                    val task = Task.findById(id)
-                    task?.completed = true
+        get("/api/tasks/{id}") {
+            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalArgumentException("Parameter id not found")
+            val task = transaction {
+                val task = Task.findById(id)
+
+                if (task != null) {
+                    return@transaction TaskResponse(
+                        id = task.id.value,
+                        title = task.title,
+                        description = task.description,
+                        completed = task.completed,
+                        createdAt = task.createdAt.toString("yyyy-MM-dd HH:mm:ss"),
+                        updatedAt = task.updatedAt.toString("yyyy-MM-dd HH:mm:ss")
+                    )
                 }
+
+                return@transaction task
             }
 
-            call.respond(HttpStatusCode.OK)
+            call.respond(mapOf("data" to task))
         }
 
-        post("/api/tasks/{id}/delete") {
-            val id = call.parameters["id"]?.toInt()
-            transaction {
-                if (id != null) {
-                    val task = Task.findById(id)
-                    task?.delete()
+        patch("/api/tasks/{id}/complete") {
+            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalArgumentException("Parameter id not found")
+            val task = transaction {
+                val task = Task.findById(id)
+
+                if (task != null) {
+                    task.completed = true
+
+                    return@transaction TaskResponse(
+                        id = task.id.value,
+                        title = task.title,
+                        description = task.description,
+                        completed = task.completed,
+                        createdAt = task.createdAt.toString("yyyy-MM-dd HH:mm:ss"),
+                        updatedAt = task.updatedAt.toString("yyyy-MM-dd HH:mm:ss")
+                    )
                 }
+
+                return@transaction task
             }
 
-            call.respond(HttpStatusCode.OK)
+            call.respond(mapOf("data" to task))
+        }
+
+        delete("/api/tasks/{id}/delete") {
+            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalArgumentException("Parameter id not found")
+            transaction {
+                Task.findById(id)?.delete()
+            }
+
+            call.respond(HttpStatusCode.NoContent)
         }
 
     }
 
 }
-
