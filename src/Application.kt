@@ -91,7 +91,7 @@ fun Application.module(testing: Boolean = false) {
 
         post("/api/tasks") {
             val request = call.receive<TaskRequest>()
-            val task = transaction {
+            val data = transaction {
                 val task = Task.new {
                     title = request.title
                     description = request.description
@@ -108,12 +108,12 @@ fun Application.module(testing: Boolean = false) {
                 )
             }
 
-            call.respond(mapOf("data" to task))
+            call.respond(mapOf("data" to data))
         }
 
         get("/api/tasks/{id}") {
             val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalUUIDException()
-            val task = transaction {
+            val data = transaction {
                 val task = Task.findById(id)
 
                 if (task != null) {
@@ -128,12 +128,12 @@ fun Application.module(testing: Boolean = false) {
                 }
             }
 
-            call.respond(mapOf("data" to task))
+            call.respond(mapOf("data" to data))
         }
 
         patch("/api/tasks/{id}/complete") {
             val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalUUIDException()
-            val task = transaction {
+            val data = transaction {
                 val task = Task.findById(id)
 
                 if (task != null) {
@@ -150,7 +150,7 @@ fun Application.module(testing: Boolean = false) {
                 }
             }
 
-            call.respond(mapOf("data" to task))
+            call.respond(mapOf("data" to data))
         }
 
         delete("/api/tasks/{id}/delete") {
