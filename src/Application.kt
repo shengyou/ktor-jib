@@ -1,11 +1,14 @@
 package io.kraftsman
 
 import io.kraftsman.entities.Task
+import io.kraftsman.exceptions.IllegalUUIDException
+import io.kraftsman.exceptions.ModelNotFoundException
 import io.kraftsman.requests.TaskRequest
 import io.kraftsman.responses.TaskResponse
 import io.kraftsman.tables.Tasks
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
+import io.ktor.features.StatusPages
 import io.ktor.gson.gson
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.*
@@ -26,6 +29,18 @@ fun Application.module(testing: Boolean = false) {
     install(ContentNegotiation) {
         gson {
 
+        }
+    }
+
+    install(StatusPages) {
+        exception<IllegalUUIDException> { cause ->
+            call.respond(HttpStatusCode.BadRequest, mapOf("message" to cause.message))
+        }
+        exception<ModelNotFoundException> { cause ->
+            call.respond(HttpStatusCode.NotFound, mapOf("message" to cause.message))
+        }
+        exception<NumberFormatException> {
+            call.respond(HttpStatusCode.NotFound, mapOf("message" to "Illegal UUID"))
         }
     }
 
@@ -97,7 +112,7 @@ fun Application.module(testing: Boolean = false) {
         }
 
         get("/api/tasks/{id}") {
-            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalArgumentException("Parameter id not found")
+            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalUUIDException()
             val task = transaction {
                 val task = Task.findById(id)
 
@@ -108,16 +123,16 @@ fun Application.module(testing: Boolean = false) {
                         description = task.description,
                         completed = task.completed
                     )
+                } else {
+                    throw ModelNotFoundException()
                 }
-
-                return@transaction task
             }
 
             call.respond(mapOf("data" to task))
         }
 
         patch("/api/tasks/{id}/complete") {
-            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalArgumentException("Parameter id not found")
+            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalUUIDException()
             val task = transaction {
                 val task = Task.findById(id)
 
@@ -130,9 +145,9 @@ fun Application.module(testing: Boolean = false) {
                         description = task.description,
                         completed = task.completed
                     )
+                } else {
+                    throw ModelNotFoundException()
                 }
-
-                return@transaction task
             }
 
             call.respond(mapOf("data" to task))
