@@ -6,8 +6,8 @@ import io.kraftsman.responses.TaskResponse
 import io.kraftsman.tables.Tasks
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
+import io.ktor.gson.gson
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
 import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.routing.*
@@ -24,7 +24,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module(testing: Boolean = false) {
 
     install(ContentNegotiation) {
-        jackson {
+        gson {
 
         }
     }
