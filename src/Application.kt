@@ -154,9 +154,14 @@ fun Application.module(testing: Boolean = false) {
         }
 
         delete("/api/tasks/{id}/delete") {
-            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalArgumentException("Parameter id not found")
+            val id = UUID.fromString(call.parameters["id"]) ?: throw IllegalUUIDException()
             transaction {
-                Task.findById(id)?.delete()
+                val task = Task.findById(id)
+                if (task != null) {
+                    task.delete()
+                } else {
+                    throw ModelNotFoundException()
+                }
             }
 
             call.respond(HttpStatusCode.NoContent)
