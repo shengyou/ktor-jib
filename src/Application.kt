@@ -66,9 +66,7 @@ fun Application.module(testing: Boolean = false) {
                         it.id.value,
                         it.title,
                         it.description,
-                        it.completed,
-                        it.createdAt.toString("yyyy-MM-dd HH:mm:ss"),
-                        it.updatedAt.toString("yyyy-MM-dd HH:mm:ss")
+                        it.completed
                     )
                 }
             }
@@ -91,9 +89,7 @@ fun Application.module(testing: Boolean = false) {
                     id = task.id.value,
                     title = task.title,
                     description = task.description,
-                    completed = task.completed,
-                    createdAt = task.createdAt.toString("yyyy-MM-dd HH:mm:ss"),
-                    updatedAt = task.updatedAt.toString("yyyy-MM-dd HH:mm:ss")
+                    completed = task.completed
                 )
             }
 
@@ -110,9 +106,7 @@ fun Application.module(testing: Boolean = false) {
                         id = task.id.value,
                         title = task.title,
                         description = task.description,
-                        completed = task.completed,
-                        createdAt = task.createdAt.toString("yyyy-MM-dd HH:mm:ss"),
-                        updatedAt = task.updatedAt.toString("yyyy-MM-dd HH:mm:ss")
+                        completed = task.completed
                     )
                 }
 
@@ -134,9 +128,7 @@ fun Application.module(testing: Boolean = false) {
                         id = task.id.value,
                         title = task.title,
                         description = task.description,
-                        completed = task.completed,
-                        createdAt = task.createdAt.toString("yyyy-MM-dd HH:mm:ss"),
-                        updatedAt = task.updatedAt.toString("yyyy-MM-dd HH:mm:ss")
+                        completed = task.completed
                     )
                 }
 
